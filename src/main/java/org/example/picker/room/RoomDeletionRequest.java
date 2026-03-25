@@ -5,11 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class RoomJoinRequest {
+@NoArgsConstructor
+public class RoomDeletionRequest {
 
-    private String username;
+    private String creator;
     private String roomName;
-    private String code;
 }

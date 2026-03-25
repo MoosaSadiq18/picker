@@ -3,6 +3,7 @@ import org.example.picker.auth.AuthDetailer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -33,10 +34,26 @@ public class RoomService {
         return "Room " + request.getRoomName() + " created successfully by " + request.getCreator();
     }
 
+    public String deleteRoom(RoomDeletionRequest request){
+        Long roomId = roomRepository.getRoomIdByRoomName(request.getRoomName());
+        String roomCreator = roomRepository.getCreatorByRoom(roomId);
+
+        if(!(request.getCreator().equals(roomCreator))){
+            return "Only creator can delete the room";
+        }
+
+        RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+        roomRepository.delete(room);
+        return "Room " + request.getRoomName() + " deleted successfully";
+    }
+
     public String joinRoom(RoomJoinRequest request){
         Long roomId = roomRepository.getRoomIdByRoomName(request.getRoomName());
-        String email = authDetailer.getCurrentUserEmail();
+        String roomCreator = roomRepository.getCreatorByRoom(roomId);
 
+        if(roomCreator.equals(request.getUsername())){
+            return "Creator cannot join";
+        }
         if(!roomCodeService.isCodeOfRoom(roomId,request.getCode())){
             return "Wrong room code";
         }
@@ -44,11 +61,15 @@ public class RoomService {
         RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
         RoomMemberEntity member = new RoomMemberEntity();
 
-        member.setUsername(email);
+        member.setUsername(request.getUsername());
         room.getMembers().add(member);
         room.setMemberCount(room.getMemberCount()+1);
         roomRepository.save(room);
-        return "Member " + email + " joined " + room.getRoomName() + " Successfully";
+        return "Member " + request.getUsername() + " joined " + room.getRoomName() + " Successfully";
+    }
+
+    public List<RoomEntity> getAllRooms(){
+        return roomRepository.findAll();
     }
 
 }
