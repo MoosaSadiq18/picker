@@ -18,4 +18,7 @@ public class ImageEntity {
 
     private String imageName;
     private Long userId;
+
+    @Column(name = "room_id")
+    private Long roomId;
 }
