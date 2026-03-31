@@ -17,10 +17,11 @@ public class RoomEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long roomId;
 
     private String roomName;
     private String creator;
+    private Long creatorId;
     private String code;
     private int memberCount;
 

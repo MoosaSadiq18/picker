@@ -15,6 +15,9 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
+    @Autowired
+    RoomRepository roomRepository;
+
     @PostMapping("/createRoom")
     public ResponseEntity<String> createRoom(@RequestBody RoomCreationRequest request){
         return ResponseEntity.ok(roomService.createRoom(request));

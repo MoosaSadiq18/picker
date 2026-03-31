@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 
-/*@Service
+@Service
 public class S3Service {
 
         @Value("${aws.bucket.name}")
@@ -27,4 +27,3 @@ public class S3Service {
                     RequestBody.fromBytes(file.getBytes()));
         }
 }
-*/
