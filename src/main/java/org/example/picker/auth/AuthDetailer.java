@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthDetailer {
 
-    public String getCurrentUserEmail(){
+    public String getCurrentUsername(){
         return SecurityContextHolder
                 .getContext()
                 .getAuthentication()

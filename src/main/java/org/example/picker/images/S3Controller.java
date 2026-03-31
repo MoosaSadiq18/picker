@@ -1,5 +1,7 @@
 package org.example.picker.images;
 
+import org.example.picker.auth.UserRepository;
+import org.example.picker.room.RoomRepository;
 import org.example.picker.room.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,30 +16,29 @@ import java.io.IOException;
 public class S3Controller {
 
     @Autowired
-    ImageRepository imageRepository;
-
-    @Autowired
     RoomService roomService;
 
     @Autowired
     S3Service s3Service;
 
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    RoomRepository roomRepository;
+
     @PostMapping("/uploadImages")
     public ResponseEntity<String> uploadImages(@RequestParam("image")MultipartFile image
-                                                ,@RequestParam Long userId
-                                                ,@RequestParam Long roomId) throws IOException {
+                                                ,@RequestParam String username
+                                                ,@RequestParam String roomName) throws IOException {
 
         if(image.isEmpty()){
             return ResponseEntity.badRequest().body("Image is empty " + image.getOriginalFilename());
         }
 
-        s3Service.uploadFileToS3(image);
-        ImageEntity imageEntity = new ImageEntity();
-        imageEntity.setImageName(image.getName());
-        imageEntity.setUserId(userId);
-        imageEntity.setRoomId(roomId);
-        imageEntity.setImageName(imageEntity.getImageName());
-        imageRepository.save(imageEntity);
+        Long userId = userRepository.getUserIdByUsername(username);
+        Long roomId = roomRepository.getRoomIdByRoomName(roomName);
+        s3Service.uploadFileToS3(image,userId,roomId);
 
         return ResponseEntity.ok("Image " + image.getOriginalFilename() + " uploaded successfully");
     }

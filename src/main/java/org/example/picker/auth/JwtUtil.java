@@ -20,9 +20,9 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    public String generateToken(String email){
+    public String generateToken(String username){
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *24))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -41,12 +41,12 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String extractEmail(String token){
+    public String extractUsername(String token){
         return parseClaims(token).getSubject();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails){
-        return extractEmail(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     public boolean isTokenExpired(String token){

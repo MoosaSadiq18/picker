@@ -13,9 +13,6 @@ public interface RoomRepository extends JpaRepository<RoomEntity,Long> {
      @Query("select i.roomId from RoomEntity i where i.roomName =:roomName")
      Long getRoomIdByRoomName(@Param("roomName") String roomName);
 
-     @Query("select i.userId from UserEntity i where i.username =:creator")
-     Long getUserIdByUserName(@Param("creator") String creator);
-
      @Query("select i.code from RoomEntity i where i.roomId =:roomId")
      String getCodeByRoomId(@Param("roomId") Long roomId);
 

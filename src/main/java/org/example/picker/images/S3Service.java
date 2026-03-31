@@ -1,7 +1,10 @@
 package org.example.picker.images;
 
+import org.example.picker.room.RoomEntity;
+import org.example.picker.room.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -19,11 +22,23 @@ public class S3Service {
         @Autowired
         S3Client s3Client;
 
-        public void uploadFileToS3(MultipartFile file) throws IOException {
+        @Autowired
+        RoomRepository roomRepository;
+
+
+        public void uploadFileToS3(MultipartFile file, Long userId, Long roomId) throws IOException {
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(file.getOriginalFilename())
                             .build(),
                     RequestBody.fromBytes(file.getBytes()));
+
+            RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+            ImageEntity image = new ImageEntity();
+
+            image.setImageName(file.getOriginalFilename());
+            image.setUserId(userId);
+            room.getImages().add(image);
+            roomRepository.save(room);
         }
 }

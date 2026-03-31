@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.example.picker.auth.UserEntity;
+import org.example.picker.images.ImageEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,6 +29,10 @@ public class RoomEntity {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "room_id")
     private List<RoomMemberEntity> members;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "room_id")
+    private List<ImageEntity> images;
 
     public RoomEntity(){
         this.memberCount = 0;

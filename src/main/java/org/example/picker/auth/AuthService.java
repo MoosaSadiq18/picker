@@ -24,14 +24,15 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public String register(String email, String password){
+    public String register(String username,String email, String password){
 
-        Optional<UserEntity> existingUser = userRepository.findByEmail(email);
+        Optional<UserEntity> existingUser = userRepository.findByUsername(email);
         if(existingUser.isPresent()){
             return "User already exists";
         }
 
         UserEntity user = new UserEntity();
+        user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("USER");
@@ -40,8 +41,8 @@ public class AuthService {
         return "Registered Successfully";
     }
 
-    public String login(String email, String password){
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email,password));
-        return jwtUtil.generateToken(email);
+    public String login(String username, String password){
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,password));
+        return jwtUtil.generateToken(username);
     }
 }

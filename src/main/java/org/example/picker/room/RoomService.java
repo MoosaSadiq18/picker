@@ -30,8 +30,8 @@ public class RoomService {
         if(existingRoom.isPresent()){
             return "Room " + request.getRoomName() + " already exists";
         }
-        else if(SecurityContextHolder.getContext().getAuthentication().getName()!=request.getCreator()){
-            return "Room creator " + request.getCreator() + " doesnot exist";
+        else if(!authDetailer.getCurrentUsername().matches(request.getCreator())){
+            return "Room creator " + request.getCreator() + " doesnot exist and authDetailer is "+ authDetailer.getCurrentUsername();
         }
 
         RoomEntity room = new RoomEntity();
@@ -59,7 +59,7 @@ public class RoomService {
     public String joinRoom(RoomJoinRequest request){
         Long roomId = roomRepository.getRoomIdByRoomName(request.getRoomName());
         String roomCreator = roomRepository.getCreatorByRoom(roomId);
-        Long userId = roomRepository.getUserIdByUserName(request.getUsername());
+        Long userId = userRepository.getUserIdByUsername(request.getUsername());
 
         if(roomCreator.equals(request.getUsername())){
             return "Creator cannot join";
@@ -68,7 +68,7 @@ public class RoomService {
             return "Wrong room code";
         }
 
-        UserEntity existingUser = userRepository.findByEmail(request.getUsername()).orElseThrow(() -> new RuntimeException("Joining User not found"));
+        UserEntity existingUser = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException("Joining User not found"));
 
         RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
         RoomMemberEntity member = new RoomMemberEntity();

@@ -17,6 +17,5 @@ public class ImageEntity {
     private Long imageId;
 
     private String imageName;
-    private Long roomId;
     private Long userId;
 }
