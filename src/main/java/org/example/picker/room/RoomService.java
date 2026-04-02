@@ -2,7 +2,9 @@ package org.example.picker.room;
 import org.example.picker.auth.AuthDetailer;
 import org.example.picker.auth.UserEntity;
 import org.example.picker.auth.UserRepository;
+import org.example.picker.images.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,9 @@ public class RoomService {
 
     @Autowired
     private RoomCodeService roomCodeService;
+
+    @Autowired
+    S3Service s3Service;
 
     @Autowired
     private AuthDetailer authDetailer;
@@ -56,16 +61,17 @@ public class RoomService {
         return "Room " + request.getRoomName() + " deleted successfully";
     }
 
-    public String joinRoom(RoomJoinRequest request){
+    public ResponseEntity<byte[]> joinRoom(RoomJoinRequest request){
         Long roomId = roomRepository.getRoomIdByRoomName(request.getRoomName());
         String roomCreator = roomRepository.getCreatorByRoom(roomId);
         Long userId = userRepository.getUserIdByUsername(request.getUsername());
 
+
         if(roomCreator.equals(request.getUsername())){
-            return "Creator cannot join";
+            return ResponseEntity.badRequest().body("Creator cannot join".getBytes());
         }
         else if(!roomCodeService.isCodeOfRoom(roomId,request.getCode())){
-            return "Wrong room code";
+            return ResponseEntity.badRequest().body("Wrong room code".getBytes());
         }
 
         UserEntity existingUser = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException("Joining User not found"));
@@ -77,7 +83,8 @@ public class RoomService {
         room.getMembers().add(member);
         room.setMemberCount(room.getMemberCount()+1);
         roomRepository.save(room);
-        return "Member " + request.getUsername() + " joined " + room.getRoomName() + " Successfully";
+        return s3Service.displayImagesOnJoin(roomId);
+
     }
 
     public List<RoomEntity> getAllRooms(){

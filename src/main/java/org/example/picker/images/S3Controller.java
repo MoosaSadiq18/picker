@@ -44,7 +44,7 @@ public class S3Controller {
 
         Long userId = userRepository.getUserIdByUsername(username);
         Long roomId = roomRepository.getRoomIdByRoomName(roomName);
-        s3Service.uploadFileToS3(image,userId,roomId);
+        s3Service.uploadImageToS3(image,userId,roomId);
 
         return ResponseEntity.ok("Image " + image.getOriginalFilename() + " uploaded successfully");
     }
@@ -64,5 +64,12 @@ public class S3Controller {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.attachment().filename(filename).build().toString())
                 .body(image);
+    }
+
+    @DeleteMapping("/deleteImage/{imageId}")
+    public ResponseEntity<String> deleteImageById(@PathVariable Long roomId, @PathVariable Long imageId) throws IOException{
+        s3Service.deleteImage(roomId,imageId);
+
+        return ResponseEntity.ok("Image " + imageId + " deleted");
     }
 }

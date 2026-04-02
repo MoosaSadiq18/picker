@@ -29,8 +29,8 @@ public class RoomController {
     }
 
     @PostMapping("/joinRoom")
-    public ResponseEntity<String> joinRoom(@RequestBody RoomJoinRequest request){
-        return ResponseEntity.ok(roomService.joinRoom(request));
+    public ResponseEntity<byte[]> joinRoom(@RequestBody RoomJoinRequest request){
+        return roomService.joinRoom(request);
     }
 
     @GetMapping("/getRooms")
