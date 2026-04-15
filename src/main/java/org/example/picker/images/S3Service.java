@@ -18,10 +18,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class S3Service {
@@ -98,6 +95,5 @@ public class S3Service {
                         ContentDisposition.attachment().filename(filename).build().toString())
                 .body(image);
     }
-
 
 }

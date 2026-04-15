@@ -4,19 +4,19 @@
 
 2:
 
-    upload pics to that room
+    ***upload pics to that room***
 
 3:
     
-    give qr code or link access for others to join
+    ***give qr code or link access for others to join***
 
 4:
     
-    images go to s3 bucket
+    ***images go to s3 bucket***
 
 5:
 
-    images then go to aws rekognition
+    images matched via opencv api
     
 6:
     
