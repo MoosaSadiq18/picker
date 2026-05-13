@@ -72,4 +72,7 @@ public class S3Controller {
 
         return ResponseEntity.ok("Image " + imageId + " deleted");
     }
+
+  //  @GetMapping("/{filename}")
+  //  public ResponseEntity<String> getUrl(@PathVariable MultipartFile file)
 }

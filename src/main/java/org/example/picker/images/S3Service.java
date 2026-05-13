@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 @Service
 public class S3Service {
@@ -34,6 +35,8 @@ public class S3Service {
 
     @Autowired
     ImageRepository imageRepository;
+
+    public String generatePresignedUrl()
 
 
     public void uploadImageToS3(MultipartFile file, Long userId, Long roomId) throws IOException {
@@ -81,7 +84,7 @@ public class S3Service {
     }
 
     public ResponseEntity<byte[]> displayImagesOnJoin(Long roomId){
-        RoomEntity existingRoom = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room doesnot exist"));
+        RoomEntity existingRoom = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room does not exist"));
         byte[] image = getImageByRoomId(roomId);
         String filename = imageRepository.findByRoomId(roomId).getImageName();
         String contentType = URLConnection.guessContentTypeFromName(filename);
