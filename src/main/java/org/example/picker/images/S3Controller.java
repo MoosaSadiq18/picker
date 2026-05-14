@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.io.IOException;
 import java.net.URLConnection;
@@ -33,20 +34,17 @@ public class S3Controller {
     @Autowired
     ImageRepository imageRepository;
 
-    @PostMapping("/uploadImage")
-    public ResponseEntity<String> uploadImages(@RequestParam("image")MultipartFile image
-                                                ,@RequestParam String username
-                                                ,@RequestParam String roomName) throws IOException {
 
-        if(image.isEmpty()){
-            return ResponseEntity.badRequest().body("Image is empty " + image.getOriginalFilename());
+    @GetMapping("/getUploadUrl")
+    public ResponseEntity<String> getUploadUrl(@RequestParam("image") MultipartFile image,
+                                               @RequestParam Long roomId){
+        String url = s3Service.generateUploadPresignedUrl(roomId,image.getOriginalFilename());
+        if(url==null){
+            throw new RuntimeException("Url not generated");
         }
-
-        Long userId = userRepository.getUserIdByUsername(username);
-        Long roomId = roomRepository.getRoomIdByRoomName(roomName);
-        s3Service.uploadImageToS3(image,userId,roomId);
-
-        return ResponseEntity.ok("Image " + image.getOriginalFilename() + " uploaded successfully");
+        else{
+            return ResponseEntity.ok(url);
+        }
     }
 
     @GetMapping("/getImage/{roomId}")
@@ -66,13 +64,27 @@ public class S3Controller {
                 .body(image);
     }
 
+
+    @PostMapping("/uploadImage")
+    public ResponseEntity<String> uploadImages(@RequestParam("image")MultipartFile image
+                                                ,@RequestParam String username
+                                                ,@RequestParam String roomName) throws IOException {
+
+        if(image.isEmpty()){
+            return ResponseEntity.badRequest().body("Image is empty " + image.getOriginalFilename());
+        }
+
+        Long userId = userRepository.getUserIdByUsername(username);
+        Long roomId = roomRepository.getRoomIdByRoomName(roomName);
+        s3Service.uploadImageToS3(image,userId,roomId);
+
+        return ResponseEntity.ok("Image " + image.getOriginalFilename() + " uploaded successfully");
+    }
+
     @DeleteMapping("/deleteImage/{imageId}")
     public ResponseEntity<String> deleteImageById(@PathVariable Long roomId, @PathVariable Long imageId) throws IOException{
         s3Service.deleteImage(roomId,imageId);
 
         return ResponseEntity.ok("Image " + imageId + " deleted");
     }
-
-  //  @GetMapping("/{filename}")
-  //  public ResponseEntity<String> getUrl(@PathVariable MultipartFile file)
 }
