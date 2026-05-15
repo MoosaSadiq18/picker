@@ -40,9 +40,20 @@ public class S3Controller {
                                                @RequestParam Long roomId){
         String url = s3Service.generateUploadPresignedUrl(roomId,image.getOriginalFilename());
         if(url==null){
-            throw new RuntimeException("Url not generated");
+            throw new RuntimeException("Upload url not generated");
         }
         else{
+            return ResponseEntity.ok(url);
+        }
+    }
+
+    @GetMapping("/getdownloadUrl/{filename}")
+    public ResponseEntity<String> getDownloadUrl(@PathVariable String filename){
+        String url = s3Service.generateDownloadPresignedUrl(filename);
+        if(url == null){
+            throw new RuntimeException("Download url not generated");
+        }
+        else {
             return ResponseEntity.ok(url);
         }
     }
