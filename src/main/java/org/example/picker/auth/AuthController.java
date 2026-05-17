@@ -1,8 +1,10 @@
 package org.example.picker.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.services.s3.model.Bucket;
 
 @RestController
 public class AuthController {
@@ -20,6 +22,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request){
+        if()
         return ResponseEntity.ok(authService.login(request.getUsername(),request.getPassword()));
     }
 

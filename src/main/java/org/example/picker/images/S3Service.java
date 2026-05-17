@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.UUID;
 
 @Service
 public class S3Service {
@@ -46,33 +47,6 @@ public class S3Service {
 
     @Autowired
     private S3Presigner s3Presigner;
-
-
-    public void uploadImageToS3(MultipartFile file, Long userId, Long roomId) throws IOException {
-        RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-
-        s3Client.putObject(PutObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(file.getOriginalFilename())
-                        .build(),
-                RequestBody.fromBytes(file.getBytes()));
-
-        ImageEntity image = new ImageEntity();
-
-        image.setImageName(file.getOriginalFilename());
-        image.setUserId(userId);
-        room.getImages().add(image);
-        roomRepository.save(room);
-    }
-
-    public void deleteImage(Long roomId, Long imageId){
-        RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-        ImageEntity image = imageRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Image not found"));
-
-        if(image!=null){
-            imageRepository.deleteById(imageId);
-        }
-    }
 
     public byte[] getImageByRoomId(Long roomId) {
         ImageEntity image = imageRepository.findByRoomId(roomId);
@@ -108,8 +82,14 @@ public class S3Service {
                 .body(image);
     }
 
-    public String generateUploadPresignedUrl(Long roomId,String filename){
-        String key = "room/" + roomId + "/" + filename;
+    public String generatePfpUrl(String filename, Long userId){
+        String key = String.format(
+                "user/%d/%s/%s",
+                userId,
+                UUID.randomUUID(),
+                filename
+        );
+
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
@@ -121,6 +101,37 @@ public class S3Service {
                 .build();
 
         PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(presignRequest);
+
+        return presignedPutObjectRequest.url().toString();
+    }
+
+    public String generateUploadPresignedUrl(String filename, Long roomId){
+        RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+
+        String key = String.format(
+                "room/%d/%s/%s",
+                roomId,
+                UUID.randomUUID(),
+                filename
+        );
+
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(60))
+                .putObjectRequest(request)
+                .build();
+
+        PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(presignRequest);
+
+        ImageEntity image = new ImageEntity();
+        image.setImageName(filename);
+        image.setUserId(userId);
+        room.getImages().add(image);
+        roomRepository.save(room);
 
         return presignedPutObjectRequest.url().toString();
     }

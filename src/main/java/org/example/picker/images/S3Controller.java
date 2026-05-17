@@ -35,10 +35,21 @@ public class S3Controller {
     ImageRepository imageRepository;
 
 
+    @GetMapping("/getUserProfileUrl")
+    public ResponseEntity<String> getUserProfileUrl(@RequestParam String pfpName, @RequestParam Long userId){
+        String url = s3Service.generatePfpUrl(pfpName,userId);
+        if(url==null){
+            throw new RuntimeException("Upload url not generated");
+        }
+        else{
+            return ResponseEntity.ok(url);
+        }
+    }
+
     @GetMapping("/getUploadUrl")
-    public ResponseEntity<String> getUploadUrl(@RequestParam("image") MultipartFile image,
+    public ResponseEntity<String> getUploadUrl(@RequestParam String image,
                                                @RequestParam Long roomId){
-        String url = s3Service.generateUploadPresignedUrl(roomId,image.getOriginalFilename());
+        String url = s3Service.generateUploadPresignedUrl(image,roomId);
         if(url==null){
             throw new RuntimeException("Upload url not generated");
         }
@@ -75,27 +86,5 @@ public class S3Controller {
                 .body(image);
     }
 
-
-    @PostMapping("/uploadImage")
-    public ResponseEntity<String> uploadImages(@RequestParam("image")MultipartFile image
-                                                ,@RequestParam String username
-                                                ,@RequestParam String roomName) throws IOException {
-
-        if(image.isEmpty()){
-            return ResponseEntity.badRequest().body("Image is empty " + image.getOriginalFilename());
-        }
-
-        Long userId = userRepository.getUserIdByUsername(username);
-        Long roomId = roomRepository.getRoomIdByRoomName(roomName);
-        s3Service.uploadImageToS3(image,userId,roomId);
-
-        return ResponseEntity.ok("Image " + image.getOriginalFilename() + " uploaded successfully");
-    }
-
-    @DeleteMapping("/deleteImage/{imageId}")
-    public ResponseEntity<String> deleteImageById(@PathVariable Long roomId, @PathVariable Long imageId) throws IOException{
-        s3Service.deleteImage(roomId,imageId);
-
-        return ResponseEntity.ok("Image " + imageId + " deleted");
-    }
 }
+
