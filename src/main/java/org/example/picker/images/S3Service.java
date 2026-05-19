@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -129,7 +130,7 @@ public class S3Service {
 
         ImageEntity image = new ImageEntity();
         image.setImageName(filename);
-        image.setUserId(userId);
+        image.setUserId(roomRepository.getCreatorIdByRoomId(roomId));
         room.getImages().add(image);
         roomRepository.save(room);
 
@@ -151,6 +152,7 @@ public class S3Service {
 
         return presignedGetObjectRequest.url().toString();
     }
+
 
 
 }

@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class S3Controller {
@@ -69,21 +71,22 @@ public class S3Controller {
         }
     }
 
-    @GetMapping("/getImage/{roomId}")
-    public ResponseEntity<byte[]> getImageByRoomId(@PathVariable Long roomId) throws IOException{
-        RoomEntity existingRoom = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room doesnot exist"));
-        byte[] image = s3Service.getImageByRoomId(roomId);
-        String filename = imageRepository.findByRoomId(roomId).getImageName();
-        String contentType = URLConnection.guessContentTypeFromName(filename);
+    @GetMapping("/displayImages/{roomId}")
+    public ResponseEntity<List<String>> displayImages(@RequestParam Long roomId){
+        List<String> displayUrls = new ArrayList<>();
 
-        if(filename==null){
-            contentType = "application/octet-stream";
+
+        if(displayUrls.isEmpty()){
+            throw new RuntimeException("Display urls not generated");
         }
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.attachment().filename(filename).build().toString())
-                .body(image);
+        else{
+            return ResponseEntity.ok(displayUrls);
+        }
+    }
+
+    @PostMapping("/python/user")
+    public ResponseEntity<String> getPython(@RequestBody UserRequest request){
+        return ResponseEntity.ok("username is : " + request.getUsername());
     }
 
 }
