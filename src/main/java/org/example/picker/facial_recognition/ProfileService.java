@@ -1,8 +1,10 @@
 package org.example.picker.facial_recognition;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -41,8 +43,8 @@ public class ProfileService {
     public double getEucleadianDistance(List<List<Double>> pfpEmbeddings, List<List<Double>> imageEmbeddings){
         double total = 0;
         for(int i=0; i<pfpEmbeddings.size(); i++){
-            List<Double> pfp = pfpEmbeddings.get(i);
-            List<Double> img = imageEmbeddings.get(i);
+            List<Double> pfp = normalize(pfpEmbeddings.get(i));
+            List<Double> img = normalize(imageEmbeddings.get(i));
 
             for(int j=0; j<pfp.size(); j++){
                 double diff = pfp.get(j) - img.get(j);
@@ -50,6 +52,21 @@ public class ProfileService {
             }
         }
         return Math.sqrt(total);
+    }
+
+    public List<Double> normalize(List<Double> embedding) {
+        double norm = 0.0;
+        for(double v : embedding) {
+            norm += v * v;
+        }
+
+        norm = Math.sqrt(norm);
+        List<Double> result = new ArrayList<>(embedding.size());
+
+        for (double v : embedding) {
+            result.add(v / norm);
+        }
+        return result;
     }
 
 }

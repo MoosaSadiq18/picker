@@ -77,7 +77,7 @@ public class ProfileController {
     @Autowired
     ProfileEmbeddingRepository pfpRepository;
 
-    private final Double THRESHOLD = 8.0;
+    private final Double THRESHOLD = 0.6;
 
     @GetMapping("/getMatches")
     public ResponseEntity<String> getFacialMatches(@RequestParam Long imageId, @RequestParam Long pfpId) {
