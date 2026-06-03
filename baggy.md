@@ -13,7 +13,7 @@
 4:
     
     ***images go to s3 bucket***
-m
+
 5:
 
     images matched via opencv api

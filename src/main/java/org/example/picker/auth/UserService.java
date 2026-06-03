@@ -14,6 +14,9 @@ public class UserService implements UserDetailsService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    AuthDetailer authDetailer;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByUsername(username)
@@ -24,5 +27,11 @@ public class UserService implements UserDetailsService {
                 .password(user.getPassword())
                 .roles(user.getRole())
                 .build();
+    }
+
+    public boolean isUserAllowed(Long givenUserId){
+        String username = authDetailer.getCurrentUsername();
+        Long userId = userRepository.getUserIdByUsername(username);
+        return userId.equals(givenUserId);
     }
 }

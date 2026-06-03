@@ -1,14 +1,18 @@
 package org.example.picker.images;
 
 import org.example.picker.auth.UserRepository;
+import org.example.picker.auth.UserService;
+import org.example.picker.facial_recognition.ProfileController;
 import org.example.picker.room.RoomEntity;
 import org.example.picker.room.RoomRepository;
 import org.example.picker.room.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -36,10 +40,20 @@ public class S3Controller {
     @Autowired
     ImageRepository imageRepository;
 
+    @Autowired
+    ProfileController profileController;
 
-    @GetMapping("/getUserProfileUrl")
-    public ResponseEntity<String> getUserProfileUrl(@RequestParam String pfpName, @RequestParam Long userId){
-        String url = s3Service.generatePfpUrl(pfpName,userId);
+    @Autowired
+    UserService userService;
+
+    @GetMapping("/getUploadProfileUrl")
+    public ResponseEntity<String> getUserProfileUrl(@RequestParam String pfpName,
+                                                    @RequestParam Long userId){
+       /* if(!userService.isUserAllowed(userId)){
+            throw new AuthorizationDeniedException("User not authorized");
+        }*/
+
+        String url = s3Service.generatePfpUploadUrl(pfpName,userId);
         if(url==null){
             throw new RuntimeException("Upload url not generated");
         }
@@ -48,10 +62,15 @@ public class S3Controller {
         }
     }
 
-    @GetMapping("/getUploadUrl")
-    public ResponseEntity<String> getUploadUrl(@RequestParam String image,
-                                               @RequestParam Long roomId){
-        String url = s3Service.generateUploadPresignedUrl(image,roomId);
+    @GetMapping("/getUploadImageUrl")
+    public ResponseEntity<String> getUserImageUrl(@RequestParam String pfpName,
+                                                  @RequestParam Long userId,
+                                                  @RequestParam Long roomId){
+       /* if(!userService.isUserAllowed(userId)){
+            throw new AuthorizationDeniedException("User not authorized");
+        }*/
+
+        String url = s3Service.generateImageUploadUrl(pfpName,userId,roomId);
         if(url==null){
             throw new RuntimeException("Upload url not generated");
         }
@@ -60,33 +79,33 @@ public class S3Controller {
         }
     }
 
-    @GetMapping("/getdownloadUrl/{filename}")
-    public ResponseEntity<String> getDownloadUrl(@PathVariable String filename){
-        String url = s3Service.generateDownloadPresignedUrl(filename);
+    @GetMapping("/getDownloadPfpUrl")
+    public ResponseEntity<String> getDownloadPfpUrl(@RequestParam String pfpName, @RequestParam Long userId){
+      /*  if(!userService.isUserAllowed(userId)){
+            throw new AuthorizationDeniedException("User not authorized");
+        }*/
+
+        String url = s3Service.generateDownloadPresignedUrl(pfpName);
         if(url == null){
             throw new RuntimeException("Download url not generated");
         }
         else {
+            profileController.sendPfpUrl(url,userId);
             return ResponseEntity.ok(url);
         }
     }
 
-    @GetMapping("/displayImages/{roomId}")
-    public ResponseEntity<List<String>> displayImages(@RequestParam Long roomId){
-        List<String> displayUrls = new ArrayList<>();
+    @GetMapping("/getdownloadImageUrl")
+    public ResponseEntity<String> getDownloadImageUrl(@RequestParam String imageName, @RequestParam Long userId){
 
-
-        if(displayUrls.isEmpty()){
-            throw new RuntimeException("Display urls not generated");
+        String url = s3Service.generateDownloadPresignedUrl(imageName);
+        if(url == null){
+            throw new RuntimeException("Download url not generated");
         }
-        else{
-            return ResponseEntity.ok(displayUrls);
+        else {
+            profileController.sendImageUrl(url,userId);
+            return ResponseEntity.ok(url);
         }
-    }
-
-    @PostMapping("/python/user")
-    public ResponseEntity<String> getPython(@RequestBody UserRequest request){
-        return ResponseEntity.ok("username is : " + request.getUsername());
     }
 
 }

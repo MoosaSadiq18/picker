@@ -83,7 +83,8 @@ public class RoomService {
         room.getMembers().add(member);
         room.setMemberCount(room.getMemberCount()+1);
         roomRepository.save(room);
-        return s3Service.displayImagesOnJoin(roomId);
+        byte[] r = {1,2};
+        return ResponseEntity.ok(r);
 
     }
 

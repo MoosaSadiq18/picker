@@ -49,41 +49,9 @@ public class S3Service {
     @Autowired
     private S3Presigner s3Presigner;
 
-    public byte[] getImageByRoomId(Long roomId) {
-        ImageEntity image = imageRepository.findByRoomId(roomId);
 
-        String filename = image.getImageName();
-        if(filename==null){
-            throw new NullPointerException("Image " + image.getImageId() + " is empty");
-        }
-        else{
-            ResponseBytes<GetObjectResponse> objectAsBytes =
-                    s3Client.getObjectAsBytes(GetObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(filename)
-                            .build());
+    public String generatePfpUploadUrl(String filename, Long userId){
 
-            return objectAsBytes.asByteArray();
-        }
-    }
-
-    public ResponseEntity<byte[]> displayImagesOnJoin(Long roomId){
-        RoomEntity existingRoom = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room does not exist"));
-        byte[] image = getImageByRoomId(roomId);
-        String filename = imageRepository.findByRoomId(roomId).getImageName();
-        String contentType = URLConnection.guessContentTypeFromName(filename);
-
-        if(filename==null){
-            contentType = "application/octet-stream";
-        }
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.attachment().filename(filename).build().toString())
-                .body(image);
-    }
-
-    public String generatePfpUrl(String filename, Long userId){
         String key = String.format(
                 "user/%d/%s/%s",
                 userId,
@@ -106,7 +74,7 @@ public class S3Service {
         return presignedPutObjectRequest.url().toString();
     }
 
-    public String generateUploadPresignedUrl(String filename, Long roomId){
+    public String generateImageUploadUrl(String filename, Long userId, Long roomId){
         RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
 
         String key = String.format(
