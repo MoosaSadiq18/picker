@@ -61,17 +61,17 @@ public class RoomService {
         return "Room " + request.getRoomName() + " deleted successfully";
     }
 
-    public ResponseEntity<byte[]> joinRoom(RoomJoinRequest request){
+    public ResponseEntity<String> joinRoom(RoomJoinRequest request){
         Long roomId = roomRepository.getRoomIdByRoomName(request.getRoomName());
         String roomCreator = roomRepository.getCreatorByRoom(roomId);
         Long userId = userRepository.getUserIdByUsername(request.getUsername());
 
 
         if(roomCreator.equals(request.getUsername())){
-            return ResponseEntity.badRequest().body("Creator cannot join".getBytes());
+            return ResponseEntity.badRequest().body("Creator cannot join");
         }
         else if(!roomCodeService.isCodeOfRoom(roomId,request.getCode())){
-            return ResponseEntity.badRequest().body("Wrong room code".getBytes());
+            return ResponseEntity.badRequest().body("Wrong room code");
         }
 
         UserEntity existingUser = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException("Joining User not found"));
@@ -83,8 +83,8 @@ public class RoomService {
         room.getMembers().add(member);
         room.setMemberCount(room.getMemberCount()+1);
         roomRepository.save(room);
-        byte[] r = {1,2};
-        return ResponseEntity.ok(r);
+
+        return ResponseEntity.ok("Room joined");
 
     }
 

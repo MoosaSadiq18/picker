@@ -32,6 +32,8 @@ public class UserService implements UserDetailsService {
     public boolean isUserAllowed(Long givenUserId){
         String username = authDetailer.getCurrentUsername();
         Long userId = userRepository.getUserIdByUsername(username);
+        System.out.println("Logged user: " + username + " id: " + userId);
+        System.out.println("Trying to be user : " + givenUserId);
         return userId.equals(givenUserId);
     }
 }

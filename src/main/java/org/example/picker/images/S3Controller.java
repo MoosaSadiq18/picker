@@ -1,5 +1,7 @@
 package org.example.picker.images;
 
+import lombok.RequiredArgsConstructor;
+import org.example.picker.auth.AuthDetailer;
 import org.example.picker.auth.UserRepository;
 import org.example.picker.auth.UserService;
 import org.example.picker.facial_recognition.ProfileController;
@@ -23,35 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class S3Controller {
 
-    @Autowired
-    RoomService roomService;
-
-    @Autowired
-    S3Service s3Service;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    RoomRepository roomRepository;
-
-    @Autowired
-    ImageRepository imageRepository;
-
-    @Autowired
-    ProfileController profileController;
-
-    @Autowired
-    UserService userService;
+    private final RoomService roomService;
+    private final S3Service s3Service;
+    private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
+    private final ImageRepository imageRepository;
+    private final ProfileController profileController;
+    private final UserService userService;
+    private final AuthDetailer authDetailer;
 
     @GetMapping("/getUploadProfileUrl")
     public ResponseEntity<String> getUserProfileUrl(@RequestParam String pfpName,
                                                     @RequestParam Long userId){
-       /* if(!userService.isUserAllowed(userId)){
-            throw new AuthorizationDeniedException("User not authorized");
-        }*/
+        if(!userService.isUserAllowed(userId)){
+            return ResponseEntity.badRequest().body("User not authorized");
+        }
 
         String url = s3Service.generatePfpUploadUrl(pfpName,userId);
         if(url==null){
@@ -66,9 +57,15 @@ public class S3Controller {
     public ResponseEntity<String> getUserImageUrl(@RequestParam String pfpName,
                                                   @RequestParam Long userId,
                                                   @RequestParam Long roomId){
-       /* if(!userService.isUserAllowed(userId)){
-            throw new AuthorizationDeniedException("User not authorized");
-        }*/
+
+        if(!userService.isUserAllowed(userId)){
+            return ResponseEntity.badRequest().body("User not authorized");
+        }
+
+        String username = userRepository.getUsernameByUserId(userId);
+        if(!authDetailer.getCurrentUsername().matches(username)){
+            return ResponseEntity.badRequest().body("Room creator " + username + " doesnot exist and authDetailer is "+ authDetailer.getCurrentUsername());
+        }
 
         String url = s3Service.generateImageUploadUrl(pfpName,userId,roomId);
         if(url==null){
@@ -81,9 +78,9 @@ public class S3Controller {
 
     @GetMapping("/getDownloadPfpUrl")
     public ResponseEntity<String> getDownloadPfpUrl(@RequestParam String pfpName, @RequestParam Long userId){
-      /*  if(!userService.isUserAllowed(userId)){
-            throw new AuthorizationDeniedException("User not authorized");
-        }*/
+        if(!userService.isUserAllowed(userId)){
+            return ResponseEntity.badRequest().body("User not authorized");
+        }
 
         String url = s3Service.generateDownloadPresignedUrl(pfpName);
         if(url == null){
@@ -97,6 +94,9 @@ public class S3Controller {
 
     @GetMapping("/getdownloadImageUrl")
     public ResponseEntity<String> getDownloadImageUrl(@RequestParam String imageName, @RequestParam Long userId){
+        if(!userService.isUserAllowed(userId)){
+            return ResponseEntity.badRequest().body("User not authorized");
+        }
 
         String url = s3Service.generateDownloadPresignedUrl(imageName);
         if(url == null){
