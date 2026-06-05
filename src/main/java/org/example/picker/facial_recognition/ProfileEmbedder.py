@@ -54,6 +54,7 @@ class imageRequest(BaseModel):
     imageUrl: str
     userId: int
     roomId: int
+    position: int
 
 @app.post("/uploadImageEmbeddings")
 def uploadImageEmbeddings(request: imageRequest):
@@ -73,13 +74,18 @@ def uploadImageEmbeddings(request: imageRequest):
 
     results = DeepFace.represent(img, model_name='Facenet', enforce_detection=True, detector_backend='retinaface')
     responses = []
+    i = request.position
+    print("Position: ", i)
 
     for face in results:
         payload = {
             "userId": request.userId,
             "roomId": request.roomId,
-            "embeddings": face['embedding']
+            "embeddings": face['embedding'],
+            "position": i
         }
+
+        i = i+1
 
         print("Embeddings",face['embedding'])
         print("userId",request.userId)

@@ -40,6 +40,7 @@ public class ProfileController {
         body.put("imageUrl", imageUrl);
         body.put("userId", userId);
         body.put("roomId", 1);
+        body.put("position", 0);
 
         ResponseEntity<String> response = restTemplate.postForEntity(receiverUrl, body, String.class);
         return ResponseEntity.ok(response.getBody());
@@ -63,7 +64,12 @@ public class ProfileController {
         if (request.getEmbeddings() == null) {
             throw new NullPointerException("Embeddings are empty");
         }
-        boolean saved = profileService.saveImageEmbeddings(request.getEmbeddings(), request.getUserId(),request.getRoomId());
+        boolean saved = profileService.saveImageEmbeddings(
+                request.getEmbeddings(),
+                request.getUserId(),
+                request.getRoomId(),
+                request.getPosition()
+                );
 
         if (!saved) {
             return ResponseEntity.badRequest().body("Could not save embeddings");
@@ -80,9 +86,28 @@ public class ProfileController {
     private final Double THRESHOLD = 0.6;
 
     @GetMapping("/getMatches")
-    public ResponseEntity<String> getFacialMatches(@RequestParam Long imageId, @RequestParam Long pfpId) {
-        List<List<Double>> pfpEmbedddings = pfpRepository.getPfpEmbeddingsById(pfpId);
-        List<List<Double>> imageEmbedddings = imageRepository.getImageEmbeddingsById(imageId);
+    public ResponseEntity<String> getFacialMatches(@RequestParam Long userId,
+                                                   @RequestParam Long roomId) {
+
+        List<List<Double>> pfpEmbedddings = pfpRepository.getPfpEmbeddingsByUserId(userId);
+        int imagesCount = imageRepository.getImagesCount(roomId);
+        int matchedCount = 0;
+        int unmatchedCount = 0;
+
+        for(int position=0; position<imagesCount; position++){
+            List<List<Double>> imageEmbedddings = imageRepository.getImageEmbeddingsByRoomId(roomId,position);
+            Long imageId = imageRepository.getImageId(roomId,position);
+
+            for(int j=0; j<pfpEmbedddings.size(); j++){
+                double result = profileService.getEucleadianDistance(pfpEmbedddings, imageEmbedddings);
+                if(result < THRESHOLD){
+                    matchedCount++;
+                    profileService.displayUserImage(userId,roomId,imageId);
+                }
+                unmatchedCount++;
+            }
+        }
+
 
         for(int i=0;i<pfpEmbedddings.size();i++){
             List<Double> p = pfpEmbedddings.get(i);
@@ -91,10 +116,8 @@ public class ProfileController {
             }
         }
 
-        double result = profileService.getEucleadianDistance(pfpEmbedddings, imageEmbedddings);
-        if (result < THRESHOLD) {
-            return ResponseEntity.ok("Images matched " + result);
-        }
-        return ResponseEntity.badRequest().body("Images not matched " + result);
+
+        return ResponseEntity.ok("Images matched: " + matchedCount + " and Images not matched: " + unmatchedCount);
+
     }
 }

@@ -1,5 +1,6 @@
 package org.example.picker.facial_recognition;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -8,13 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
 
-    @Autowired
-    ProfileEmbeddingRepository repository;
-
-    @Autowired
-    ImageEmbeddingsRepository imageRepository;
+    private final ProfileEmbeddingRepository repository;
+    private final ImageEmbeddingsRepository imageRepository;
 
     public boolean savePfpEmbeddings(List<Double> embeddings, Long userId){
         if(embeddings==null){
@@ -27,7 +26,7 @@ public class ProfileService {
         return true;
     }
 
-    public boolean saveImageEmbeddings(List<Double> embeddings, Long userId, Long roomId){
+    public boolean saveImageEmbeddings(List<Double> embeddings, Long userId, Long roomId, int position){
         if(embeddings==null){
             return false;
         }
@@ -35,6 +34,7 @@ public class ProfileService {
         image.setImageEmbeddings(embeddings);
         image.setUserId(userId);
         image.setRoomId(roomId);
+        image.setPosition(position);
         imageRepository.save(image);
         return true;
     }
@@ -67,6 +67,10 @@ public class ProfileService {
             result.add(v / norm);
         }
         return result;
+    }
+
+    public void displayUserImage(Long userId, Long roomId, Long imageId){
+
     }
 
 }

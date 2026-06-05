@@ -10,6 +10,12 @@ import java.util.List;
 @Repository
 public interface ImageEmbeddingsRepository extends JpaRepository<EmbeddingsEntity,Long> {
 
-    @Query("select i.imageEmbeddings from EmbeddingsEntity i where i.imageId =:imageId")
-    List<List<Double>> getImageEmbeddingsById(@Param("imageId") Long imageId);
+    @Query("select i.imageEmbeddings from EmbeddingsEntity i where i.roomId =:roomId and i.position =:position")
+    List<List<Double>> getImageEmbeddingsByRoomId(@Param("roomId") Long roomId, @Param("position") int position);
+
+    @Query("select count(imageEmbeddings) from EmbeddingsEntity where roomId =:roomId")
+    int getImagesCount(@Param("roomId") Long roomId);
+
+    @Query("select i.imageId from EmbeddingsEntity i where i.roomId =:roomId and i.position =:position")
+    Long getImageId(@Param("roomId") Long roomId, @Param("position") int position);
 }

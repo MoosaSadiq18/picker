@@ -13,5 +13,6 @@ public class ImageEmbeddingRequest {
 
     private Long userId;
     private Long roomId;
+    private int position;
     private List<Double> embeddings;
 }

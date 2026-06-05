@@ -19,6 +19,7 @@ public class EmbeddingsEntity {
     private Long imageId;
     private Long userId;
     private Long roomId;
+    private int position;
 
     @Lob
     private List<Double> imageEmbeddings;

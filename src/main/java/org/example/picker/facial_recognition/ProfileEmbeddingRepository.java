@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface ProfileEmbeddingRepository extends JpaRepository<ProfileEntity,Long> {
 
-    @Query("select i.profileEmbedding from ProfileEntity i where i.imageId =:pfpId")
-    List<List<Double>> getPfpEmbeddingsById(@Param("pfpId") Long pfpId);
+    @Query("select i.profileEmbedding from ProfileEntity i where i.userId =:userId")
+    List<List<Double>> getPfpEmbeddingsByUserId(@Param("userId") Long userId);
 
 }
