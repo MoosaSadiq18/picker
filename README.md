@@ -14,7 +14,7 @@ System runs face matching and each member only sees images where their face appe
 ## Stack
 
 - Spring Boot: REST API, room and user management
-- Python: face matching service using DeepFace using its Facenet model
+- Python and FastAPI: face matching service using DeepFace using its Facenet model
 - MariaDB: rooms, members, image and pfp embeddings, their metadata, match results
 - AWS S3: image storage and retrieval with presigned URLs to reduce load of server and ensure scalability
 
