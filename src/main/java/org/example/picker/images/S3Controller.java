@@ -93,19 +93,26 @@ public class S3Controller {
     }
 
     @GetMapping("/getdownloadImageUrl")
-    public ResponseEntity<String> getDownloadImageUrl(@RequestParam String imageName, @RequestParam Long userId){
+    public ResponseEntity<String> getDownloadImageUrl(@RequestParam Long userId,
+                                                      @RequestParam Long roomId){
         if(!userService.isUserAllowed(userId)){
             return ResponseEntity.badRequest().body("User not authorized");
         }
 
-        String url = s3Service.generateDownloadPresignedUrl(imageName);
-        if(url == null){
-            throw new RuntimeException("Download url not generated");
+        int count = imageRepository.getImagesCount(roomId);
+        List<String> imageName = imageRepository.getImageName(roomId);
+
+        for(int i=0; i<count; i++){
+            String url = s3Service.generateDownloadPresignedUrl(imageName.get(i));
+            if(url == null){
+                return ResponseEntity.badRequest().body("Download url not generated");
+            }
+            else {
+                profileController.sendImageUrl(url,userId);
+            }
         }
-        else {
-            profileController.sendImageUrl(url,userId);
-            return ResponseEntity.ok(url);
-        }
+
+        return ResponseEntity.ok("Images download urls sent succesfully");
     }
 
 }

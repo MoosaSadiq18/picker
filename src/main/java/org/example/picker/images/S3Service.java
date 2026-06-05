@@ -77,16 +77,9 @@ public class S3Service {
     public String generateImageUploadUrl(String filename, Long userId, Long roomId){
         RoomEntity room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
 
-        String key = String.format(
-                "room/%d/%s/%s",
-                roomId,
-                UUID.randomUUID(),
-                filename
-        );
-
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(key)
+                .key(filename)
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -99,6 +92,7 @@ public class S3Service {
         ImageEntity image = new ImageEntity();
         image.setImageName(filename);
         image.setUserId(roomRepository.getCreatorIdByRoomId(roomId));
+        imageRepository.save(image);
         room.getImages().add(image);
         roomRepository.save(room);
 

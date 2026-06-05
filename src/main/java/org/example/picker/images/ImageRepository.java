@@ -10,5 +10,9 @@ import java.util.List;
 @Repository
 public interface ImageRepository extends JpaRepository<ImageEntity,Long> {
 
-    ImageEntity findByRoomId(Long roomId);
+    @Query("select count(imageName) from ImageEntity where roomId =:roomId")
+    int getImagesCount(@Param("roomId") Long roomId);
+
+    @Query("select imageName from ImageEntity where roomId =:roomId")
+    List<String> getImageName(@Param("roomId") Long roomId);
 }
