@@ -99,16 +99,22 @@ public class S3Controller {
             return ResponseEntity.badRequest().body("User not authorized");
         }
 
-        int count = imageRepository.getImagesCount(roomId);
-        List<String> imageName = imageRepository.getImageName(roomId);
+        List<String> imageName = imageRepository.getAllImageName(roomId);
+        System.out.println("Got imageName");
+        for(String imgName: imageName) {
+            System.out.println(imgName);
+        }
 
-        for(int i=0; i<count; i++){
-            String url = s3Service.generateDownloadPresignedUrl(imageName.get(i));
+        for(String imgName: imageName){
+            String url = s3Service.generateDownloadPresignedUrl(imgName);
             if(url == null){
                 return ResponseEntity.badRequest().body("Download url not generated");
             }
             else {
-                profileController.sendImageUrl(url,userId);
+                System.out.println("Sending image: " + imgName + " userId: " + userId);
+                Long imageId = imageRepository.getImageIdByFilename(imgName);
+                profileController.sendImageUrl(url,imageId,userId,roomId);
+                System.out.println("Sent image: " + imgName + " userId: " + userId);
             }
         }
 

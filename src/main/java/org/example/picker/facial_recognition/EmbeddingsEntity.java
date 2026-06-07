@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.picker.images.ImageEntity;
 
 import java.util.List;
 
@@ -15,8 +16,13 @@ import java.util.List;
 public class EmbeddingsEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageId;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "image_id")
+    private ImageEntity image;
+
     private Long userId;
     private Long roomId;
     private int position;

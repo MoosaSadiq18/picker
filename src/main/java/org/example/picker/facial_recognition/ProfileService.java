@@ -1,11 +1,14 @@
 package org.example.picker.facial_recognition;
 
 import lombok.RequiredArgsConstructor;
+import org.example.picker.images.ImageEntity;
 import org.example.picker.images.ImageRepository;
 import org.example.picker.images.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +18,7 @@ import java.util.List;
 public class ProfileService {
 
     private final ProfileEmbeddingRepository repository;
-    private final ImageEmbeddingsRepository imageEmbRepository;
+    private final ImageEmbeddingsRepository imageEmbeddingsRepository;
     private final ImageRepository imageRepository;
     private final S3Service s3Service;
 
@@ -30,16 +33,21 @@ public class ProfileService {
         return true;
     }
 
-    public boolean saveImageEmbeddings(List<Double> embeddings, Long userId, Long roomId, int position){
+    public boolean saveImageEmbeddings(List<Double> embeddings, Long imageId, Long userId, Long roomId, int position){
         if(embeddings==null){
             return false;
         }
+
+        ImageEntity imageEntity = imageRepository.findById(imageId)
+                .orElseThrow(()-> new RuntimeException("Image not found " + imageId));
+
         EmbeddingsEntity image = new EmbeddingsEntity();
+        image.setImage(imageEntity);
         image.setImageEmbeddings(embeddings);
         image.setUserId(userId);
         image.setRoomId(roomId);
         image.setPosition(position);
-        imageEmbRepository.save(image);
+        imageEmbeddingsRepository.save(image);
         return true;
     }
 
@@ -81,5 +89,6 @@ public class ProfileService {
         String downloadUrl = s3Service.generateDownloadPresignedUrl(filename);
         return ResponseEntity.ok(downloadUrl);
     }
+
 
 }

@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ImageEmbeddingRequest {
 
+    private Long imageId;
     private Long userId;
     private Long roomId;
     private int position;
