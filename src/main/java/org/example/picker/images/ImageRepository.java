@@ -15,4 +15,7 @@ public interface ImageRepository extends JpaRepository<ImageEntity,Long> {
 
     @Query("select imageName from ImageEntity where roomId =:roomId")
     List<String> getImageName(@Param("roomId") Long roomId);
+
+    @Query("select i.imageName from ImageEntity i where i.imageId =:imageId")
+    String getFilenameByImageId(@Param("imageId") Long imageId);
 }

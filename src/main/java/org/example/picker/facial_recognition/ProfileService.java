@@ -1,6 +1,8 @@
 package org.example.picker.facial_recognition;
 
 import lombok.RequiredArgsConstructor;
+import org.example.picker.images.ImageRepository;
+import org.example.picker.images.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,9 @@ import java.util.List;
 public class ProfileService {
 
     private final ProfileEmbeddingRepository repository;
-    private final ImageEmbeddingsRepository imageRepository;
+    private final ImageEmbeddingsRepository imageEmbRepository;
+    private final ImageRepository imageRepository;
+    private final S3Service s3Service;
 
     public boolean savePfpEmbeddings(List<Double> embeddings, Long userId){
         if(embeddings==null){
@@ -35,7 +39,7 @@ public class ProfileService {
         image.setUserId(userId);
         image.setRoomId(roomId);
         image.setPosition(position);
-        imageRepository.save(image);
+        imageEmbRepository.save(image);
         return true;
     }
 
@@ -69,8 +73,13 @@ public class ProfileService {
         return result;
     }
 
-    public void displayUserImage(Long userId, Long roomId, Long imageId){
-
+    public ResponseEntity<String> displayUserImage(Long userId, Long roomId, Long imageId){
+        String filename = imageRepository.getFilenameByImageId(imageId);
+        if(filename==null){
+            return ResponseEntity.badRequest().body("Wrong imageId");
+        }
+        String downloadUrl = s3Service.generateDownloadPresignedUrl(filename);
+        return ResponseEntity.ok(downloadUrl);
     }
 
 }
