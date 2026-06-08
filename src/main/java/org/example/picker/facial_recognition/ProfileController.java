@@ -48,13 +48,12 @@ public class ProfileController {
 
 
   //  @PostMapping("/sendImageUrl")
-    public ResponseEntity<String> sendImageUrl(String imageUrl, Long imageId, Long userId, Long roomId) {
+    public ResponseEntity<String> sendImageUrl(String imageUrl, Long userId, Long roomId) {
         RestTemplate restTemplate = new RestTemplate();
         String receiverUrl = "http://localhost:8000/uploadImageEmbeddings";
 
         Map<String, Object> body = new HashMap<>();
         body.put("imageUrl", imageUrl);
-        body.put("imageId", imageId);
         body.put("userId", userId);
         body.put("roomId", roomId);
         body.put("position", 0);
@@ -73,7 +72,6 @@ public class ProfileController {
         }
         boolean saved = profileService.saveImageEmbeddings(
                 request.getEmbeddings(),
-                request.getImageId(),
                 request.getUserId(),
                 request.getRoomId(),
                 request.getPosition()
@@ -94,13 +92,16 @@ public class ProfileController {
                                                    @RequestParam Long roomId) {
 
         List<List<Double>> pfpEmbedddings = pfpRepository.getPfpEmbeddingsByUserId(userId);
+        System.out.println("Got the pfp embeddings");
         int imagesCount = imageEmbeddingsRepository.getImagesCount(roomId);
         int matchedCount = 0;
         int unmatchedCount = 0;
 
         for(int position=0; position<imagesCount; position++){
-            List<List<Double>> imageEmbedddings = imageEmbeddingsRepository.getImageEmbeddingsByRoomId(roomId,position);
             Long imageId = imageEmbeddingsRepository.getImageId(roomId,position);
+            System.out.println("Got the imageId: "+imageId);
+            List<List<Double>> imageEmbedddings = imageEmbeddingsRepository.getImageEmbeddingsByRoomId(imageId,roomId,position);
+            System.out.println("Got the image embeddings with position "+position);
 
             for(int j=0; j<pfpEmbedddings.size(); j++){
                 double result = profileService.getEucleadianDistance(pfpEmbedddings, imageEmbedddings);

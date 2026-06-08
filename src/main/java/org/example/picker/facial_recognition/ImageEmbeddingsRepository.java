@@ -11,7 +11,7 @@ import java.util.List;
 public interface ImageEmbeddingsRepository extends JpaRepository<EmbeddingsEntity,Long> {
 
     @Query("select i.imageEmbeddings from EmbeddingsEntity i where i.roomId =:roomId and i.position =:position")
-    List<List<Double>> getImageEmbeddingsByRoomId(@Param("roomId") Long roomId, @Param("position") int position);
+    List<List<Double>> getImageEmbeddingsByRoomId(@Param("imageId") Long imageId, @Param("roomId") Long roomId, @Param("position") int position);
 
     @Query("select count(imageEmbeddings) from EmbeddingsEntity where roomId =:roomId")
     int getImagesCount(@Param("roomId") Long roomId);

@@ -112,8 +112,7 @@ public class S3Controller {
             }
             else {
                 System.out.println("Sending image: " + imgName + " userId: " + userId);
-                Long imageId = imageRepository.getImageIdByFilename(imgName);
-                profileController.sendImageUrl(url,imageId,userId,roomId);
+                profileController.sendImageUrl(url,userId,roomId);
                 System.out.println("Sent image: " + imgName + " userId: " + userId);
             }
         }

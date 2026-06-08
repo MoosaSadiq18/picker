@@ -1,7 +1,7 @@
 # Picker
 
 Private room based image sharing using facial recognition to avoid 
-having to search for your that fine side posing picture in a bulk of pictures.
+having to search for your that fine posing picture in a bulk full of pictures of your weird homies.
 
 ## How It Works
 

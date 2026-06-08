@@ -33,16 +33,12 @@ public class ProfileService {
         return true;
     }
 
-    public boolean saveImageEmbeddings(List<Double> embeddings, Long imageId, Long userId, Long roomId, int position){
+    public boolean saveImageEmbeddings(List<Double> embeddings, Long userId, Long roomId, int position){
         if(embeddings==null){
             return false;
         }
 
-        ImageEntity imageEntity = imageRepository.findById(imageId)
-                .orElseThrow(()-> new RuntimeException("Image not found " + imageId));
-
         EmbeddingsEntity image = new EmbeddingsEntity();
-        image.setImage(imageEntity);
         image.setImageEmbeddings(embeddings);
         image.setUserId(userId);
         image.setRoomId(roomId);
@@ -86,8 +82,9 @@ public class ProfileService {
         if(filename==null){
             return ResponseEntity.badRequest().body("Wrong imageId");
         }
-        String downloadUrl = s3Service.generateDownloadPresignedUrl(filename);
-        return ResponseEntity.ok(downloadUrl);
+       // String downloadUrl = s3Service.generateDownloadPresignedUrl(filename);
+        System.out.println("UserId: "+userId + " matches "+ imageId);
+        return ResponseEntity.ok("UserId: "+userId + " matches "+ imageId);
     }
 
 

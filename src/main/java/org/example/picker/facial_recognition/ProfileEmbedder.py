@@ -52,7 +52,6 @@ def uploadPfpEmbeddings(request: PfpRequest):
 
 class imageRequest(BaseModel):
     imageUrl: str
-    imageId: int
     userId: int
     roomId: int
     position: int
@@ -80,7 +79,6 @@ def uploadImageEmbeddings(request: imageRequest):
 
     for face in results:
         payload = {
-            "imageId": request.imageId,
             "userId": request.userId,
             "roomId": request.roomId,
             "embeddings": face['embedding'],
