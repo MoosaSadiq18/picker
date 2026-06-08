@@ -92,7 +92,7 @@ public class S3Controller {
         }
     }
 
-    @GetMapping("/getdownloadImageUrl")
+    @GetMapping("/getDownloadImageUrl")
     public ResponseEntity<String> getDownloadImageUrl(@RequestParam Long userId,
                                                       @RequestParam Long roomId){
         if(!userService.isUserAllowed(userId)){

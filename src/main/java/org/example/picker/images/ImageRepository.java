@@ -13,8 +13,8 @@ public interface ImageRepository extends JpaRepository<ImageEntity,Long> {
     @Query("select i.imageName from ImageEntity i where i.roomId =:roomId")
     List<String> getAllImageName(@Param("roomId") Long roomId);
 
-    @Query("select i.imageName from ImageEntity i where i.imageId =:imageId")
-    String getFilenameByImageId(@Param("imageId") Long imageId);
+    @Query("select i.imageName from ImageEntity i where i.userId =:userId")
+    String getFilenameByImageId(@Param("userId") Long userId);
 
     @Query("select i.imageId from ImageEntity i where i.imageName =:imageName")
     Long getImageIdByFilename(@Param("imageName") String imageName);

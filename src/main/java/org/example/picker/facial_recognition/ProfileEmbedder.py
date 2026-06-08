@@ -4,6 +4,7 @@ from fastapi import FastAPI
 import requests
 from pydantic import BaseModel
 import numpy as np
+import random
 
 app = FastAPI()
 
@@ -77,8 +78,11 @@ def uploadImageEmbeddings(request: imageRequest):
     i = request.position
     print("Position: ", i)
 
+    imageGroupId = random.randint(0,10000)
+
     for face in results:
         payload = {
+            "imageGroupId": imageGroupId,
             "userId": request.userId,
             "roomId": request.roomId,
             "embeddings": face['embedding'],

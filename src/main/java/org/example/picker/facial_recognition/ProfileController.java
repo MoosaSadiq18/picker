@@ -72,6 +72,7 @@ public class ProfileController {
         }
         boolean saved = profileService.saveImageEmbeddings(
                 request.getEmbeddings(),
+                request.getImageGroupId(),
                 request.getUserId(),
                 request.getRoomId(),
                 request.getPosition()
@@ -89,36 +90,33 @@ public class ProfileController {
 
     @GetMapping("/getMatches")
     public ResponseEntity<String> getFacialMatches(@RequestParam Long userId,
-                                                   @RequestParam Long roomId) {
+                                                   @RequestParam Long roomId,
+                                                   @RequestParam Long imageGroupId) {
 
         List<List<Double>> pfpEmbedddings = pfpRepository.getPfpEmbeddingsByUserId(userId);
         System.out.println("Got the pfp embeddings");
-        int imagesCount = imageEmbeddingsRepository.getImagesCount(roomId);
+        int imagesCount = imageEmbeddingsRepository.getImagesCount(roomId,imageGroupId);
+        System.out.println("Image count: "+imagesCount);
+
         int matchedCount = 0;
         int unmatchedCount = 0;
 
         for(int position=0; position<imagesCount; position++){
-            Long imageId = imageEmbeddingsRepository.getImageId(roomId,position);
+            Long imageId = imageEmbeddingsRepository.getImageIdByImageGroupId(imageGroupId,position);
             System.out.println("Got the imageId: "+imageId);
-            List<List<Double>> imageEmbedddings = imageEmbeddingsRepository.getImageEmbeddingsByRoomId(imageId,roomId,position);
+            List<List<Double>> imageEmbedddings = imageEmbeddingsRepository.getImageEmbeddingsByRoomId(imageGroupId,imageId,roomId,position);
             System.out.println("Got the image embeddings with position "+position);
 
             for(int j=0; j<pfpEmbedddings.size(); j++){
                 double result = profileService.getEucleadianDistance(pfpEmbedddings, imageEmbedddings);
                 if(result < THRESHOLD){
                     matchedCount++;
-                    profileService.displayUserImage(userId,roomId,imageId);
+                    profileService.displayUserImage(userId,roomId,imageId,imageGroupId);
                 }
                 unmatchedCount++;
             }
         }
 
-        for(int i=0;i<pfpEmbedddings.size();i++){
-            List<Double> p = pfpEmbedddings.get(i);
-            for(int j=0;j<p.size();j++){
-                System.out.println("Embeddings are " + p.get(j));
-            }
-        }
 
         return ResponseEntity.ok("Images matched: " + matchedCount + " and Images not matched: " + unmatchedCount);
 

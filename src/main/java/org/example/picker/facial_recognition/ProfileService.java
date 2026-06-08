@@ -33,13 +33,14 @@ public class ProfileService {
         return true;
     }
 
-    public boolean saveImageEmbeddings(List<Double> embeddings, Long userId, Long roomId, int position){
+    public boolean saveImageEmbeddings(List<Double> embeddings, Long imageGroupId, Long userId, Long roomId, int position){
         if(embeddings==null){
             return false;
         }
 
         EmbeddingsEntity image = new EmbeddingsEntity();
         image.setImageEmbeddings(embeddings);
+        image.setImageGroupId(imageGroupId);
         image.setUserId(userId);
         image.setRoomId(roomId);
         image.setPosition(position);
@@ -77,13 +78,15 @@ public class ProfileService {
         return result;
     }
 
-    public ResponseEntity<String> displayUserImage(Long userId, Long roomId, Long imageId){
-        String filename = imageRepository.getFilenameByImageId(imageId);
-        if(filename==null){
+    public ResponseEntity<String> displayUserImage(Long userId, Long roomId, Long imageId, Long imageGroupId){
+        System.out.println("Display called");
+        String imageName = imageRepository.getFilenameByImageId(userId);
+        System.out.println("Image name: " + imageName);
+        if(imageName==null){
             return ResponseEntity.badRequest().body("Wrong imageId");
         }
        // String downloadUrl = s3Service.generateDownloadPresignedUrl(filename);
-        System.out.println("UserId: "+userId + " matches "+ imageId);
+        System.out.println("UserId: "+userId + " matches imageGroupId: "+ imageGroupId);
         return ResponseEntity.ok("UserId: "+userId + " matches "+ imageId);
     }
 

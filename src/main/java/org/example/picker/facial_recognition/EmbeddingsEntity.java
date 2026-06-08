@@ -18,6 +18,8 @@ public class EmbeddingsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageId;
 
+    private Long imageGroupId;
+
     private Long userId;
     private Long roomId;
     private int position;
